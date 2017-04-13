@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+
+  roscore:
+    container_name: roscore
+    image: ros:indigo-didi
+    build: ros-indigo
+    command: roscore
+    ports:
+      - "11411:11411"
+    networks:
+      - ros
+
+  rosvelodyne:
+    container_name: rosvelodyne
+    image: ros:indigo-didi
+    build: ros-indigo
+    #command: rosrun velodyne_pointcloud cloud_node _calibration:=./data/calibration.yaml
+    #command: rosrun velodyne_pointcloud cloud_node
+    command: rosrun nodelet nodelet standalone velodyne_pointcloud/TransformNodelet _calibration:=./data/calibration1.yaml
+    environment:
+      - "ROS_HOSTNAME=rosvelodyne"
+      - "ROS_MASTER_URI=http://roscore:11311"
+    volumes:
+      - ./data:/usr/share/didi/data
+    networks:
+      - ros
+    depends_on:
+      - roscore
+
+networks:
+  ros:
+    driver: bridge
